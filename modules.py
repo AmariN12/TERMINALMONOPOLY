@@ -3,6 +3,7 @@ import style as s
 from fishing import fishing_game
 from socket import socket as Socket
 import networking as net
+import random as rand
 
 def calculator() -> str:
     """A simple calculator module that can perform basic arithmetic operations."""
@@ -144,7 +145,70 @@ def fishing(gamestate: str) -> tuple[str, str]:
                 return '', 'e'
             return fishing_game_obj.results(), 'e'  
         case 'e':
-            return '', 'start'  
+            return '', 'start'
+class MazeNode:
+        def __init__(self, row, col):
+            self.col = row
+            self.row = col
+            self.visited = False
+            '''
+            Creates array of tuple. Neighboring MazeNodes and a boolean to idicate if the
+            neighboring MazeNodes are connected.
+            '''
+            self.neighbors = [(MazeNode, bool)]
+
+def maze_array_init() -> list[list[MazeNode]]:
+    num_rows = 9
+    num_cols = 19
+    maze_node_list = [MazeNode]
+    for i in range(0, num_rows):
+        for j in range(0, num_cols):
+            node = MazeNode(i, j)
+            maze_node_list[i][j] = node
+
+    for i in range(0, num_rows):
+        for j in range(0, num_cols):
+            neighbors_check = [(i+1,j), (i, j+1), (i-1, j), (i, j-1)]
+
+            for k in range(0, neighbors_check.len):
+                if(neighbors_check[k][0] < num_rows and neighbors_check[k][0] >= 0):
+                    if(neighbors_check[k][1] < num_cols and neighbors_check[k][1] >= 0):
+                        maze_node_list[i][j].neighbors.append(maze_node_list[neighbors_check[k][0]][neighbors_check[k][1]], False)
+                    else:
+                        maze_node_list[i][j].neighbors.append(None, False)
+                else:
+                    maze_node_list[i][j].neighbors.append(None, False)
+                    
+    return maze_node_list
+            
+
+def maze_generator() -> list[list[MazeNode]]:
+        num_rows = 9
+        num_cols = 19
+
+        def visit_node(visited_node : MazeNode) -> None:
+            visited_node.visited = True
+            rand.shuffle(visited_node.neighbors)
+            for i in range(0, visited_node.neighbors.len):
+                if(visited_node.neighbors[i][0].visited):
+                    continue
+                else:
+                    #Connect nodes
+                    visited_node.neighbors[i][1] = True
+                    visit_node(visited_node.neighbors[i][0])
+            return None
+        
+        mazeNodes = maze_array_init()
+        visit_node(mazeNodes[0][0])
+        
+
+        return mazeNodes
+
+def maze_data_to_string() -> str:
+    
+    pass
+    
+    
 
 def kill() -> str:
     return s.get_graphics()['skull']
