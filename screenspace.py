@@ -12,31 +12,30 @@ import platform
 import ctypes
 import shutil
 import re
+import sys
+import keyboard
+import time
 
 # Each quadrant is half the width and height of the screen 
 global rows, cols
 rows = HEIGHT//2
 cols = WIDTH//2
 
-def print_board(gameboard: list[str]) -> None:
+def notification(message: str, n: int, color: str) -> str:
     """
-    Used in printing the gameboard for the player. Overwrites the current screen to display the gameboard. 
-    
-    Parameters: 
-    gameboard (list[str]): A representation of the gameboard as a list of strings. 
-
-    Returns: None
+    Generates a notification popup message for the player.
+    Parameters:
+        message (str): The message to be displayed in the notification.
+        n (int): The position identifier for the popup. 
+                 1 - Top-left, 2 - Top-right, 3 - Bottom-left, 4 - Bottom-right, -1 - Custom position.
+        color (str): The color code for the popup text.
+    Returns:
+        str: The formatted string with the notification message and its position.
     """
-    # clear_screen()
-    # Resets cursor position to top left
-    print("\033[1A" * (HEIGHT + 4), end='\r')
-    
-    for y in range(len(gameboard)):
-        print(gameboard[y])
-
-def notification(msg: str, n: int, color: str) -> str:
     message = message + " " * max(0, (78 - len(message)))
-        # Max 78 character popup for messaging the player.
+    # Max 78 character popup for messaging the player.
+    x,y = -1,-1
+    writeto = ""
     match n:
         case 1:
             x,y = 2+10,2+5
@@ -57,7 +56,7 @@ def notification(msg: str, n: int, color: str) -> str:
             # Custom text wrapping
             p += set_cursor_str(x+2, y+i) + message[(i-1)*26:(i-1)*26+26]
     writeto += p
-    return writeto
+    return writeto + set_cursor_str(0, INPUTLINE)
 
 def replace_sequence(match, x, y):
     """
@@ -75,14 +74,21 @@ def replace_sequence(match, x, y):
     # Return the new sequence
     return f"\033[{new_y};{new_x}H"
 
-def update_quadrant(n: int, data: str, padding: bool = True):
+def update_quadrant(n: int, data: str, padding: bool = True) -> None:
     """
     Better quadrant update function.
     This exceeds others because it immediately updates a single quadrant with the new data.
     Previously, the screen would not update until print_screen() was called.
-    Furthermore, print_screen() would overwrite the entire screen, which is not ideal and slower. 
-
-    Set padding = True if you're not sure whether your module needs padding. 
+    Furthermore, print_screen() would overwrite the entire screen, which is not ideal and slower.\n
+    Set padding = True if you're not sure whether your module needs padding.
+    
+    Parameters: 
+        n (int): Number (1-4) of the terminal to change data. 
+        data (str): The string (with newlines to separate lines) to populate the quadrant with.
+        padding (bool): (default True) a flag whether or not your module needs extra padding 
+                (blank spaces) to fill in any missing lines
+    Returns: 
+        None
     """
 
     # If you're really desparate to add padding, for some edge case you can add it to the data string.
@@ -137,7 +143,6 @@ def update_quadrant(n: int, data: str, padding: bool = True):
 
         set_cursor(x=x-12 + cols//2, y= y-0+rows//2)
         print('╚══════════════════════╝')
-
 
 def update_terminal(n: int, o: int):
     """
@@ -196,7 +201,41 @@ def update_terminal(n: int, o: int):
     
     set_cursor(0,INPUTLINE)
     print(COLORS.RESET, end='')
+
+def indicate_keyboard_hook(t: int):
+    """
+    Indicates that the keyboard hook is active for a certain terminal. 
+    Changes the color of the terminal border.
+    This is important for the player to know why they can't type on the input line.
+    """
+    x,y = -1,-1
+    border_chars = [('╔','╦','╠','╬'),
+                    ('╦','╗','╬','╣'),
+                    ('╠','╬','╚','╩'),
+                    ('╬','╣','╩','╝')]
     
+    match t: 
+        case 1:
+            x,y = 0,1
+        case 2:
+            x,y = cols+2, 1
+        case 3:
+            x,y = 0, rows+2
+        case 4:
+            x,y = cols+2, rows+2
+    t = t - 1 # 0-indexed
+    c = COLORS.LIGHTBLUE
+    set_cursor(x,y)
+    print(c, end='')
+    print(border_chars[t][0] + '═' * cols + border_chars[t][1], end='')
+    set_cursor(x,y+rows+1)
+    print(border_chars[t][2] + '═' * cols + border_chars[t][3], end='')
+    for i in range(y, y + rows):
+        set_cursor(x, i+1)
+        print('║')
+        set_cursor(x+cols + (1 if (t + 1) % 2 == 0 else 2), i+1)
+        print('║')
+
 def overwrite(text: str = ""):
     """
     Writes text over 2nd to last line of the terminal (input line).
@@ -210,6 +249,39 @@ def overwrite(text: str = ""):
     """
     set_cursor(0, INPUTLINE)
     print(f'\033[1A\r{COLORS.RESET}{text}', end=' ' * (WIDTH - len(text) + 3) + '\n' + ' ' * (WIDTH + 3) + '\r')
+
+def get_valid_int(prompt, min_val = -1000000000, max_val = 1000000000, disallowed = [], allowed = []): # arbitrary large numbers
+    """
+    Prompts the user to enter an integer within a specified range and validates the input.
+    Parameters:
+        prompt (str): The message displayed to the user when asking for input.
+        min_val (int, optional): The minimum acceptable value (inclusive). Defaults to -1000000000.
+        max_val (int, optional): The maximum acceptable value (inclusive). Defaults to 1000000000.
+        disallowed (list, optional): A list of disallowed values. Defaults to an empty list.
+        allowed (list, optional): A list of allowed values. Defaults to an empty list. 
+            If a space is in the whitelist, user is allowed to skip input (enter key), returning an empty string.
+    Returns:
+        int: A valid integer input by the user within the specified range. (or an empty string if allowed)
+    Raises:
+        None: All exceptions are caught and handled by the function.
+    """
+    while True:
+        try:
+            set_cursor(0, INPUTLINE)
+            value = int(input(prompt))
+            if value in allowed:
+                return value
+            if value < min_val or value > max_val or value in disallowed:
+                raise ValueError
+            return value
+        except ValueError:
+            try:
+                value # check if value is defined. If not, the input was empty and the user pressed enter.
+            except UnboundLocalError:
+                if " " in allowed:
+                    return "" # This is the signal to skip input
+            overwrite("Invalid input. Please enter a valid integer.")
+            set_cursor(0, INPUTLINE)
 
 def clear_screen():
     """
@@ -225,6 +297,7 @@ def initialize_terminals():
     """
     Initializes the terminal screen with the default number displays and terminal borders.
     """
+    clear_screen()
     print(get_graphics()['terminals'])
     for i in range(4):
         update_quadrant(i+1, data=None)
@@ -269,6 +342,33 @@ def calibrate_print_commands():
     for i in range(len(commandsinfo)):
         for j in range(len(commandsinfo[i])):
             print(f"\033[{34+i};79H" + commandsinfo[i][:j], end="")
+
+def auto_calibrate_screen() -> None:
+    """
+    Automatically calibrates the screen. The player doesn't really know what screen size is 
+    optimal, but we do. This function will automatically adjust the screen size to the ensure 
+    minimum requirements are met.
+    """
+    if os.name == 'nt': # Windows
+        while os.get_terminal_size().lines - 5 < HEIGHT or os.get_terminal_size().columns - 5 < WIDTH:
+            keyboard.press('ctrl')
+            keyboard.send('-')
+            keyboard.release('ctrl')
+            time.sleep(0.1)
+
+        while os.get_terminal_size().lines > HEIGHT + 40 or os.get_terminal_size().columns > WIDTH + 40:
+            keyboard.press('ctrl')
+            keyboard.send('+')
+            keyboard.release('ctrl')
+            time.sleep(0.1)
+    elif os.name == 'posix': # Linux/macOS
+        while shutil.get_terminal_size().lines < HEIGHT or shutil.get_terminal_size().columns < WIDTH:
+            os.system("printf '\033[1;1t'")
+            time.sleep(0.1)
+
+        while shutil.get_terminal_size().lines > HEIGHT + 10 or shutil.get_terminal_size().columns > WIDTH + 10:
+            os.system("printf '\033[1;1t'")
+            time.sleep(0.1)
 
 def calibrate_screen(type: str) -> None:
     terminal_size = shutil.get_terminal_size()
@@ -342,3 +442,5 @@ def calibrate_screen(type: str) -> None:
             print(f"\033[44;0H" + "Press enter to play or enter r to reset the display.", end="")
             scaling_test = input()
         os.system('cls' if os.name == 'nt' else 'clear')
+
+    # auto_calibrate_screen("player")
