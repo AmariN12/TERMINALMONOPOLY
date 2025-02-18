@@ -1,15 +1,16 @@
 import random as rand
+import keyboard
 
 class MazeNode:
-        def __init__(self, row, col):
-            self.col = row
-            self.row = col
-            self.visited = False
-            '''
-            Creates array of tuple. Neighboring MazeNodes and a boolean to idicate if the
-            neighboring MazeNodes are connected.
-            '''
-            self.neighbors = [(MazeNode, bool)]
+    def __init__(self, row, col):
+        self.col = row
+        self.row = col
+        self.visited = False
+        '''
+        Creates array of tuple. Neighboring MazeNodes and a boolean to idicate if the
+        neighboring MazeNodes are connected.
+        '''
+        self.neighbors = [(MazeNode, bool)]
 
 #Create data structure
 def maze_array_init() -> list[list[MazeNode]]:
@@ -65,3 +66,36 @@ def maze_generator() -> list[list[MazeNode]]:
 def maze_data_to_string() -> str:
     
     pass
+
+def maze_input():
+    in_maze = True
+    while in_maze == True:
+        input = keyboard.read_key()
+        if input == "up":
+            if maze_str[xPos[0]-1][xPos[1]] != "-":
+                maze_str[xPos[0]][xPos[1]] = " "
+                maze_str[xPos[0]-2][xPos[1]] = "@"
+                xPos[0] -= 2
+        if input == "down":
+            if maze_str[xPos[0]+1][xPos[1]] != "-":
+                maze_str[xPos[0]][xPos[1]] = " "
+                maze_str[xPos[0]+2][xPos[1]] = "@"
+                xPos[0] += 2
+        if input == "left":
+            if maze_str[xPos[0]][xPos[1]-1] != "|":
+                maze_str[xPos[0]][xPos[1]] = " "
+                maze_str[xPos[0]][xPos[1]-2] = "@"
+                xPos[1] -= 2
+        if input == "right":
+            if maze_str[xPos[0]][xPos[1]+1] != "|":
+                maze_str[xPos[0]][xPos[1]] = " "
+                maze_str[xPos[0]][xPos[1]+2] = "@"
+                xPos[1] += 2
+        if maze_str[1][38+maze_off] == "@":
+            in_maze = False
+'''
++ +
+|X
++-+
+input as string, resolves in "for" loop to be able to type many directions at once (use wait or sleep command to force it to stop between)
+'''
