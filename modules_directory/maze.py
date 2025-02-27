@@ -134,14 +134,6 @@ def maze_data_to_string(maze_nodes: list[list[MazeNode]]) -> list[list[str]]:
             
     '''
     return maze_str
-
-test = maze_data_to_string()
-
-for i in range(0, 20):
-    for j in range(0, 75):
-        print(test[i][j], end = "")
-        if(j == 74):
-            print("Line ", i)
     
 
 def maze_input():
@@ -176,3 +168,11 @@ def maze_input():
 +-+
 input as string, resolves in "for" loop to be able to type many directions at once (use wait or sleep command to force it to stop between)
 '''
+
+test = maze_data_to_string()
+
+for i in range(0, 20):
+    for j in range(0, 75):
+        print(test[i][j], end = "")
+        if(j == 74):
+            print("Line ", i)
