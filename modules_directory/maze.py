@@ -1,5 +1,7 @@
 import random as rand
 import keyboard
+import time
+from style import set_cursor, set_cursor_str
 
 class MazeNode:
 
@@ -87,16 +89,12 @@ MazeNode[0][0] is bottom left
 maze_nodes: list[list[MazeNode]]
 '''
 def maze_data_to_string() -> list[list[str]]:
-    maze_off = 18
-    num_rows = 9
-    num_cols = 19
     #maze_str = [[' '] * 75]*20
     maze_str = [[' ' for i in range(75)] for j in range(20)]
     corner = '+'
     verticalBar = '|'
     horizontalBar = '-'
     space = ' '
-    xPos = [0,0]
 
     #Generate corners - i is rows, j is cols
     for i in range(0, 19, 2):
@@ -120,8 +118,6 @@ def maze_data_to_string() -> list[list[str]]:
     maze_str[17][-2+maze_off] = '-'
     maze_str[17][-1+maze_off] = '>'
     maze_str[17][0+maze_off] = space
-    xPos[0] = 17
-    xPos[1] = 1+maze_off
     maze_str[17][1+maze_off] = '@'
 
     #Maze exit
@@ -139,45 +135,62 @@ def maze_data_to_string() -> list[list[str]]:
     '''
     return maze_str
     
-'''
+
 def maze_input():
+    print("You've been trapped in a maze! Use the arrow keys to move and escape!")
+    maze_str = maze_data_to_string()
+    print_maze(maze_str)
+    xPos = [17, 1 + maze_off]
     in_maze = True
     while in_maze == True:
-        input = keyboard.read_key()
-        if input == "up":
+        if maze_str[1][39+maze_off] == "@":
+            print("You escaped!")
+            break
+        key = keyboard.read_key()
+        set_cursor(xPos[1], xPos[0])
+        if key == 'up':
             if maze_str[xPos[0]-1][xPos[1]] != "-":
-                maze_str[xPos[0]][xPos[1]] = " "
-                maze_str[xPos[0]-2][xPos[1]] = "@"
+                print(" ")
+                set_cursor(xPos[1], xPos[0] - 2)
+                print("@")
                 xPos[0] -= 2
-        if input == "down":
+        elif key == 'down':
             if maze_str[xPos[0]+1][xPos[1]] != "-":
-                maze_str[xPos[0]][xPos[1]] = " "
-                maze_str[xPos[0]+2][xPos[1]] = "@"
+                print(" ")
+                set_cursor(xPos[1], xPos[0] + 2)
+                print("@")
                 xPos[0] += 2
-        if input == "left":
+        elif key == 'left':
             if maze_str[xPos[0]][xPos[1]-1] != "|":
-                maze_str[xPos[0]][xPos[1]] = " "
-                maze_str[xPos[0]][xPos[1]-2] = "@"
+                print(" ")
+                set_cursor(xPos[1] - 2, xPos[0])
+                print("@")
                 xPos[1] -= 2
-        if input == "right":
+        elif key == 'right':
             if maze_str[xPos[0]][xPos[1]+1] != "|":
-                maze_str[xPos[0]][xPos[1]] = " "
-                maze_str[xPos[0]][xPos[1]+2] = "@"
+                print(" ")
+                set_cursor(xPos[1] + 2, xPos[0])
+                print("@")
                 xPos[1] += 2
-        if maze_str[1][38+maze_off] == "@":
-            in_maze = False
-'''
+        elif key == 'esc':
+            break
+        time.sleep(0.1)
+
+def print_maze(maze):
+    for i in range(0, 20):
+        for j in range(0, 75):
+            print(maze[i][j], end = "")
+            if(j == 74):
+                print("Line ", i)
+    print()
+
 '''
 + +
 |X
 +-+
 input as string, resolves in "for" loop to be able to type many directions at once (use wait or sleep command to force it to stop between)
 '''
-
-test = maze_data_to_string()
-
-for i in range(0, 20):
-    for j in range(0, 75):
-        print(test[i][j], end = "")
-        if(j == 74):
-            print("Line ", i)
+maze_off = 18
+num_rows = 9
+num_cols = 19
+maze_input()
