@@ -1,15 +1,30 @@
 import random as rand
 
+
+
 class MazeNode:
-        def __init__(self, row, col):
-            self.col = row
-            self.row = col
-            self.visited = False
-            '''
-            Creates array of tuple. Neighboring MazeNodes and a boolean to idicate if the
-            neighboring MazeNodes are connected.
-            '''
-            self.neighbors = [(MazeNode, bool)]
+
+    def __init__(self, row, col):
+        self.col = row
+        self.row = col
+
+        RIGHT = (row, col+1)
+        LEFT = (row, col-1)
+        UP = (row-1, col)
+        DOWN = (row+1, col)
+
+        self.visited = False
+        '''
+        Creates array of tuple. Neighboring MazeNodes and a boolean to idicate if the
+        neighboring MazeNodes are connected.
+        '''
+        '''
+        (i+1,j) -> Maze node below
+        (i, j+1) -> Maze node to right
+        (i-1, j) -> Maze node above
+        (i, j-1) -> Maze node left
+        '''
+        self.neighbors = [(MazeNode, bool)]
 
 #Create data structure
 def maze_array_init() -> list[list[MazeNode]]:
@@ -60,8 +75,72 @@ def maze_generator() -> list[list[MazeNode]]:
         
 
         return mazeNodes
+'''
+Use data structure to create string form of maze to print to terminal
+Terminal space: 75*20 chars
+Maze space: 39*19 chars with row 20 being fully spaces
+num rows: 9
+num cols: 19
+Maze offset: 18
 
-#Use data structure to create string form of maze to print to terminal
-def maze_data_to_string() -> str:
+Will print all of terminal space
+MazeNode[0][0] is bottom left
+maze_nodes: list[list[MazeNode]]
+'''
+def maze_data_to_string(maze_nodes: list[list[MazeNode]]) -> list[list[str]]:
+    maze_off = 18
+    num_rows = 9
+    num_cols = 19
+    #maze_str = [[' '] * 75]*20
+    maze_str = [[' ' for i in range(75)] for j in range(20)]
+    corner = '+'
+    verticalBar = '|'
+    horizontalBar = '-'
+    space = ' '
+    xPos = [0,0]
+
+    #Generate corners - i is rows, j is cols
+    for i in range(0, 19, 2):
+        for j in range(0, 39, 2):
+            maze_str[i][j+maze_off] = corner
     
-    pass
+    for i in range(0, 19, 2):
+        for j in range(1, 39, 2):
+            maze_str[i][j+maze_off] = horizontalBar
+    
+    for i in range(1, 19, 2):
+        for j in range(0, 39, 2):
+            maze_str[i][j+maze_off] = verticalBar
+    
+    #Maze entrance
+    maze_str[17][-3+maze_off] = '-'
+    maze_str[17][-2+maze_off] = '-'
+    maze_str[17][-1+maze_off] = '>'
+    maze_str[17][0+maze_off] = space
+    xPos[0] = 17
+    xPos[1] = 1+maze_off
+    maze_str[17][1+maze_off] = '@'
+
+    #Maze exit
+    maze_str[1][38+maze_off] = space
+    maze_str[1][38+maze_off+2] = '-'
+    maze_str[1][38+maze_off+3] = '-'
+    maze_str[1][38+maze_off+4] = '>'
+    
+    '''
+    for i in range(0, num_rows):
+        for j in range(0, num_cols):
+            neighbors_check = [(i-1, j), (i, j+1)]
+            for k in range(0, neighbors_check.len):
+            
+    '''
+    return maze_str
+
+test = maze_data_to_string()
+
+for i in range(0, 20):
+    for j in range(0, 75):
+        print(test[i][j], end = "")
+        if(j == 74):
+            print("Line ", i)
+    
