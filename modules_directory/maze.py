@@ -86,7 +86,7 @@ Will print all of terminal space
 MazeNode[0][0] is bottom left
 maze_nodes: list[list[MazeNode]]
 '''
-def maze_data_to_string(maze_nodes: list[list[MazeNode]]) -> list[list[str]]:
+def maze_data_to_string() -> list[list[str]]:
     maze_off = 18
     num_rows = 9
     num_cols = 19
@@ -105,10 +105,14 @@ def maze_data_to_string(maze_nodes: list[list[MazeNode]]) -> list[list[str]]:
     
     for i in range(0, 19, 2):
         for j in range(1, 39, 2):
+            if j == 1:
+                continue
             maze_str[i][j+maze_off] = horizontalBar
     
     for i in range(1, 19, 2):
         for j in range(0, 39, 2):
+            if i == 1:
+                continue
             maze_str[i][j+maze_off] = verticalBar
     
     #Maze entrance
@@ -135,7 +139,7 @@ def maze_data_to_string(maze_nodes: list[list[MazeNode]]) -> list[list[str]]:
     '''
     return maze_str
     
-
+'''
 def maze_input():
     in_maze = True
     while in_maze == True:
@@ -162,6 +166,7 @@ def maze_input():
                 xPos[1] += 2
         if maze_str[1][38+maze_off] == "@":
             in_maze = False
+'''
 '''
 + +
 |X
