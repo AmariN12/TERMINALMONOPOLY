@@ -118,7 +118,7 @@ def maze_data_to_string() -> list[list[str]]:
     maze_str[17][-2+maze_off] = '-'
     maze_str[17][-1+maze_off] = '>'
     maze_str[17][0+maze_off] = space
-    maze_str[17][1+maze_off] = '@'
+    # maze_str[17][1+maze_off] = '@'
 
     #Maze exit
     maze_str[1][38+maze_off] = space
@@ -140,41 +140,43 @@ def maze_input():
     print("You've been trapped in a maze! Use the arrow keys to move and escape!")
     maze_str = maze_data_to_string()
     print_maze(maze_str)
-    xPos = [17, 1 + maze_off]
+    xPos = [18, maze_off + 2]
     in_maze = True
     while in_maze == True:
-        if maze_str[1][39+maze_off] == "@":
+        if maze_str[4][58] == "@":
             print("You escaped!")
             break
         key = keyboard.read_key()
         set_cursor(xPos[1], xPos[0])
+        print("@")
         if key == 'up':
             if maze_str[xPos[0]-1][xPos[1]] != "-":
                 print(" ")
-                set_cursor(xPos[1], xPos[0] - 2)
-                print("@")
+                maze_str[xPos[0] - 2][xPos[1]] = "@"
+                maze_str[xPos[0]][xPos[1]] = " "
                 xPos[0] -= 2
         elif key == 'down':
             if maze_str[xPos[0]+1][xPos[1]] != "-":
                 print(" ")
-                set_cursor(xPos[1], xPos[0] + 2)
-                print("@")
+                maze_str[xPos[0] + 2][xPos[1]] = "@"
+                maze_str[xPos[0]][xPos[1]] = " "
                 xPos[0] += 2
         elif key == 'left':
             if maze_str[xPos[0]][xPos[1]-1] != "|":
                 print(" ")
-                set_cursor(xPos[1] - 2, xPos[0])
-                print("@")
+                maze_str[xPos[0]][xPos[1] - 2] = "@"
+                maze_str[xPos[0]][xPos[1]] = " "
                 xPos[1] -= 2
         elif key == 'right':
             if maze_str[xPos[0]][xPos[1]+1] != "|":
                 print(" ")
-                set_cursor(xPos[1] + 2, xPos[0])
-                print("@")
+                maze_str[xPos[0]][xPos[1] + 2] = "@"
+                maze_str[xPos[0]][xPos[1]] = " "
                 xPos[1] += 2
         elif key == 'esc':
+            print(xPos)
             break
-        time.sleep(0.1)
+        time.sleep(0.2)
 
 def print_maze(maze):
     for i in range(0, 20):
