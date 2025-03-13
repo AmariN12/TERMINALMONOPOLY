@@ -144,43 +144,48 @@ def maze_data_to_string() -> list[list[str]]:
     return maze_str
     
 
+#The main problem seems to be the translation from screenspace to mazespace. 
 def maze_input():
     print("You've been trapped in a maze! Use the arrow keys to move and escape!")
     maze_str = maze_data_to_string()
     print_maze(maze_str)
-    xPos = [19, maze_off + 2]
+    xPos = [17, maze_off+1]
     in_maze = True
     while in_maze == True:
-        if maze_str[4][58] == "@":
+        if maze_str[1][39+maze_off] == "@":
             print("You escaped!")
             break
-        set_cursor(xPos[1], xPos[0])
+        set_cursor(xPos[1]+1, xPos[0]+3)
         print("@")
         key = keyboard.read_key()
         if key == 'up' and maze_str[xPos[0]-1][xPos[1]] != "-":
+            set_cursor(xPos[1]+1, xPos[0]+3)
             print(" ")
             maze_str[xPos[0] - 2][xPos[1]] = "@"
             maze_str[xPos[0]][xPos[1]] = " "
             xPos[0] -= 2
-            set_cursor(xPos[1], xPos[0])
+            set_cursor(xPos[1]+1, xPos[0]+3)
         elif key == 'down' and maze_str[xPos[0]+1][xPos[1]] != "-":
+            set_cursor(xPos[1]+1, xPos[0]+3)
             print(" ")
             maze_str[xPos[0] + 2][xPos[1]] = "@"
             maze_str[xPos[0]][xPos[1]] = " "
             xPos[0] += 2
-            set_cursor(xPos[1], xPos[0])
+            set_cursor(xPos[1]+1, xPos[0]+3)
         elif key == 'left' and maze_str[xPos[0]][xPos[1]-1] != "|":
+            set_cursor(xPos[1]+1, xPos[0]+3)
             print(" ")
             maze_str[xPos[0]][xPos[1] - 2] = "@"
             maze_str[xPos[0]][xPos[1]] = " "
             xPos[1] -= 2
-            set_cursor(xPos[1], xPos[0])
+            set_cursor(xPos[1]+1, xPos[0]+3)
         elif key == 'right' and maze_str[xPos[0]][xPos[1]+1] != "|":
+            set_cursor(xPos[1]+1, xPos[0]+3)
             print(" ")
             maze_str[xPos[0]][xPos[1] + 2] = "@"
             maze_str[xPos[0]][xPos[1]] = " "
             xPos[1] += 2
-            set_cursor(xPos[1], xPos[0])
+            set_cursor(xPos[1]+1, xPos[0]+3)
         elif key == 'esc':
             print(xPos)
             break
@@ -190,9 +195,9 @@ def print_maze(maze):
     for i in range(0, 20):
         for j in range(0, 75):
             print(maze[i][j], end = "")
-            if(j == 74):
-                print("Line ", i)
-    print()
+            # if(j == 74):
+            #     print("Line ", i)
+    # print()
 
 '''
 + +
