@@ -1,6 +1,8 @@
 import random as rand
 import keyboard
 import time
+import sys
+sys.path.append('..') # Path to the directory
 from style import set_cursor, set_cursor_str
 
 maze_off = 18
