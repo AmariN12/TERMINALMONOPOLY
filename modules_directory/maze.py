@@ -1,18 +1,16 @@
 import random as rand
 import keyboard
 
+maze_off = 18
+num_rows = 9
+num_cols = 19
+
 class MazeNode:
-
     def __init__(self, row, col):
-        self.col = row
-        self.row = col
+        self.col: int = row
+        self.row: int = col
 
-        RIGHT = (row, col+1)
-        LEFT = (row, col-1)
-        UP = (row-1, col)
-        DOWN = (row+1, col)
-
-        self.visited = False
+        self.visited: bool = False
         '''
         Creates array of tuple. Neighboring MazeNodes and a boolean to idicate if the
         neighboring MazeNodes are connected.
@@ -23,55 +21,56 @@ class MazeNode:
         (i-1, j) -> Maze node above
         (i, j-1) -> Maze node left
         '''
-        self.neighbors = [(MazeNode, bool)]
+        self.neighbors = []
+        self.connected_neighbors = []
+
+def findNeighbor(self: MazeNode, row, col) -> MazeNode:
+    for i in range(0, len(self.connected_neighbors)):
+        if row == self.connected_neighbors[i].row and col == self.connected_neighbors[i].col:
+            return self.connected_neighbors[i]
+    return None
 
 #Create data structure
 def maze_array_init() -> list[list[MazeNode]]:
-    num_rows = 9
-    num_cols = 19
-    maze_node_list = [MazeNode]
-    #Make 2D list of maze nodes
-    for i in range(0, num_rows):
-        for j in range(0, num_cols):
-            node = MazeNode(i, j)
-            maze_node_list[i][j] = node
+    #maze_node_list = [MazeNode]
+    maze_node_list = [[MazeNode(i, j) for i in range(num_cols)] for j in range(num_rows)]
 
     #Link neighbors. Need to ensure maze nodes don't have neighbors out of bounds.
     for i in range(0, num_rows):
         for j in range(0, num_cols):
             neighbors_check = [(i+1,j), (i, j+1), (i-1, j), (i, j-1)]
 
-            for k in range(0, neighbors_check.len):
+            for k in range(0, len(neighbors_check)):
                 if(neighbors_check[k][0] < num_rows and neighbors_check[k][0] >= 0):
                     if(neighbors_check[k][1] < num_cols and neighbors_check[k][1] >= 0):
-                        maze_node_list[i][j].neighbors.append(maze_node_list[neighbors_check[k][0]][neighbors_check[k][1]], False)
+                        maze_node_list[i][j].neighbors.append(maze_node_list[neighbors_check[k][0]][neighbors_check[k][1]])
+
                     else:
-                        maze_node_list[i][j].neighbors.append(None, False)
+                        continue
                 else:
-                    maze_node_list[i][j].neighbors.append(None, False)
+                    continue
                     
     return maze_node_list
             
 #Maze generation algo
 def maze_generator() -> list[list[MazeNode]]:
-        num_rows = 9
-        num_cols = 19
-
         def visit_node(visited_node : MazeNode) -> None:
             visited_node.visited = True
+            #print("Visited node at (", visited_node.row,", ", visited_node.col, ")")
             rand.shuffle(visited_node.neighbors)
-            for i in range(0, visited_node.neighbors.len):
-                if(visited_node.neighbors[i][0].visited):
+            for i in range(0, len(visited_node.neighbors)):
+                mazeNode : MazeNode = visited_node.neighbors[i]
+                if(mazeNode.visited):
                     continue
                 else:
                     #Connect nodes
-                    visited_node.neighbors[i][1] = True
-                    visit_node(visited_node.neighbors[i][0])
+                    visited_node.neighbors[i].connected_neighbors.append(visited_node)
+                    visited_node.connected_neighbors.append(visited_node.neighbors[i])
+                    visit_node(visited_node.neighbors[i])
             return None
         
-        mazeNodes = maze_array_init()
-        visit_node(mazeNodes[0][0])
-        
+        mazeNodes : list[list[MazeNode]] = maze_array_init()
+        visit_node(mazeNodes[0][0])        
 
         return mazeNodes
 '''
@@ -87,16 +86,13 @@ MazeNode[0][0] is bottom left
 maze_nodes: list[list[MazeNode]]
 '''
 def maze_data_to_string() -> list[list[str]]:
-    maze_off = 18
-    num_rows = 9
-    num_cols = 19
     #maze_str = [[' '] * 75]*20
     maze_str = [[' ' for i in range(75)] for j in range(20)]
     corner = '+'
     verticalBar = '|'
     horizontalBar = '-'
     space = ' '
-    xPos = [0,0]
+    maze_nodes : list[list[MazeNode]] = maze_generator()
 
     #Generate corners - i is rows, j is cols
     for i in range(0, 19, 2):
@@ -105,14 +101,10 @@ def maze_data_to_string() -> list[list[str]]:
     
     for i in range(0, 19, 2):
         for j in range(1, 39, 2):
-            if j == 1:
-                continue
             maze_str[i][j+maze_off] = horizontalBar
     
     for i in range(1, 19, 2):
         for j in range(0, 39, 2):
-            if i == 1:
-                continue
             maze_str[i][j+maze_off] = verticalBar
     
     #Maze entrance
@@ -120,8 +112,6 @@ def maze_data_to_string() -> list[list[str]]:
     maze_str[17][-2+maze_off] = '-'
     maze_str[17][-1+maze_off] = '>'
     maze_str[17][0+maze_off] = space
-    xPos[0] = 17
-    xPos[1] = 1+maze_off
     maze_str[17][1+maze_off] = '@'
 
     #Maze exit
@@ -130,13 +120,23 @@ def maze_data_to_string() -> list[list[str]]:
     maze_str[1][38+maze_off+3] = '-'
     maze_str[1][38+maze_off+4] = '>'
     
-    '''
+    connections_made : int = 0
+    
     for i in range(0, num_rows):
         for j in range(0, num_cols):
             neighbors_check = [(i-1, j), (i, j+1)]
-            for k in range(0, neighbors_check.len):
-            
-    '''
+            for k in range(0, len(neighbors_check)):
+                neighbor_node = findNeighbor(maze_nodes[i][j], neighbors_check[k][0], neighbors_check[k][1])
+                if neighbor_node == None:
+                    continue
+                else:
+                    connections_made += 1
+                    if k == 0:
+                        maze_str[18 + (-2*i)][1 + (2*j) + maze_off] = " "
+                    else:
+                        maze_str[17 + (-2*i)][2 + (2*j) + maze_off] = " "
+                
+    #print("Connections made: ", connections_made)
     return maze_str
     
 '''
