@@ -146,35 +146,34 @@ def maze_input():
     print("You've been trapped in a maze! Use the arrow keys to move and escape!")
     maze_str = maze_data_to_string()
     print_maze(maze_str)
-    xPos = [18, maze_off + 2]
-    print("@")
+    xPos = [19, maze_off + 2]
     in_maze = True
     while in_maze == True:
         if maze_str[4][58] == "@":
             print("You escaped!")
             break
-        key = keyboard.read_key()
         set_cursor(xPos[1], xPos[0])
         print("@")
-        if key == 'up' and maze_str[xPos[0]][xPos[1]-1] != "-":
+        key = keyboard.read_key()
+        if key == 'up' and maze_str[xPos[0]-1][xPos[1]] != "-":
             print(" ")
             maze_str[xPos[0] - 2][xPos[1]] = "@"
             maze_str[xPos[0]][xPos[1]] = " "
             xPos[0] -= 2
             set_cursor(xPos[1], xPos[0])
-        elif key == 'down' and maze_str[xPos[0]][xPos[1]+1] != "-":
+        elif key == 'down' and maze_str[xPos[0]+1][xPos[1]] != "-":
             print(" ")
             maze_str[xPos[0] + 2][xPos[1]] = "@"
             maze_str[xPos[0]][xPos[1]] = " "
             xPos[0] += 2
             set_cursor(xPos[1], xPos[0])
-        elif key == 'left' and maze_str[xPos[0]-1][xPos[1]] != "|":
+        elif key == 'left' and maze_str[xPos[0]][xPos[1]-1] != "|":
             print(" ")
             maze_str[xPos[0]][xPos[1] - 2] = "@"
             maze_str[xPos[0]][xPos[1]] = " "
             xPos[1] -= 2
             set_cursor(xPos[1], xPos[0])
-        elif key == 'right' and maze_str[xPos[0]+1][xPos[1]] != "|":
+        elif key == 'right' and maze_str[xPos[0]][xPos[1]+1] != "|":
             print(" ")
             maze_str[xPos[0]][xPos[1] + 2] = "@"
             maze_str[xPos[0]][xPos[1]] = " "
