@@ -149,6 +149,7 @@ def maze_input():
     maze_str = maze_data_to_string()
     print_maze(maze_str)
     xPos = [18, maze_off + 2]
+    print("@")
     in_maze = True
     while in_maze == True:
         if maze_str[4][58] == "@":
@@ -157,30 +158,30 @@ def maze_input():
         key = keyboard.read_key()
         set_cursor(xPos[1], xPos[0])
         print("@")
-        if key == 'up':
-            if maze_str[xPos[0]-1][xPos[1]] != "-":
-                print(" ")
-                maze_str[xPos[0] - 2][xPos[1]] = "@"
-                maze_str[xPos[0]][xPos[1]] = " "
-                xPos[0] -= 2
-        elif key == 'down':
-            if maze_str[xPos[0]+1][xPos[1]] != "-":
-                print(" ")
-                maze_str[xPos[0] + 2][xPos[1]] = "@"
-                maze_str[xPos[0]][xPos[1]] = " "
-                xPos[0] += 2
-        elif key == 'left':
-            if maze_str[xPos[0]][xPos[1]-1] != "|":
-                print(" ")
-                maze_str[xPos[0]][xPos[1] - 2] = "@"
-                maze_str[xPos[0]][xPos[1]] = " "
-                xPos[1] -= 2
-        elif key == 'right':
-            if maze_str[xPos[0]][xPos[1]+1] != "|":
-                print(" ")
-                maze_str[xPos[0]][xPos[1] + 2] = "@"
-                maze_str[xPos[0]][xPos[1]] = " "
-                xPos[1] += 2
+        if key == 'up' and maze_str[xPos[0]][xPos[1]-1] != "-":
+            print(" ")
+            maze_str[xPos[0] - 2][xPos[1]] = "@"
+            maze_str[xPos[0]][xPos[1]] = " "
+            xPos[0] -= 2
+            set_cursor(xPos[1], xPos[0])
+        elif key == 'down' and maze_str[xPos[0]][xPos[1]+1] != "-":
+            print(" ")
+            maze_str[xPos[0] + 2][xPos[1]] = "@"
+            maze_str[xPos[0]][xPos[1]] = " "
+            xPos[0] += 2
+            set_cursor(xPos[1], xPos[0])
+        elif key == 'left' and maze_str[xPos[0]-1][xPos[1]] != "|":
+            print(" ")
+            maze_str[xPos[0]][xPos[1] - 2] = "@"
+            maze_str[xPos[0]][xPos[1]] = " "
+            xPos[1] -= 2
+            set_cursor(xPos[1], xPos[0])
+        elif key == 'right' and maze_str[xPos[0]+1][xPos[1]] != "|":
+            print(" ")
+            maze_str[xPos[0]][xPos[1] + 2] = "@"
+            maze_str[xPos[0]][xPos[1]] = " "
+            xPos[1] += 2
+            set_cursor(xPos[1], xPos[0])
         elif key == 'esc':
             print(xPos)
             break
